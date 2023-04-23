@@ -117,7 +117,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
   }
 }
 
-//Post Deployment Script Run
+//Post Deployment Script Run to set UK Region Options
 resource postdeploymentscript 'Microsoft.Compute/virtualMachines/runCommands@2022-11-01' = {
   location: location
   parent: vm
