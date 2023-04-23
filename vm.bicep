@@ -2,16 +2,16 @@
 param location string = resourceGroup().location
 
 //Set Name of Virtual Machine
-param vmname string = 'TestVMDeploy'
+param vmname string = ''  //Enter Name of VM
 
 //Set Size of Virtual Machine  ***Make this an allowed list of SKU's***
-param vmSku string = 'Standard D2s v3'
+param vmSku string = ''  //Enter Size of VM
 
 //Set Accelerated Networking to True or False  ***This will depend on VM SKU being deployed***
 param enableAcceleratedNetworking bool = true
 
 //Local Admin User Name
-param adminUserName string = 'scc-admin'
+param adminUserName string = ''  //Enter Local Admin Username
 
 //Prompt for Admin Password  ***Maybe this could be pulled from a KeyVault?***
 @secure()
@@ -21,10 +21,13 @@ param adminPassword string
 var storage = environment().suffixes.storage
 
 //Name of vNet
-param vnetName string = 'vnet-uks-sandbox-testenv'
+param vnetName string = ''  //Enter vNet Name
 
 //Name of Subnet
-param subnetName string = 'snet-uks-sandbox-production'
+param subnetName string = ''  //Enter Subnet Name
+
+//IP Address
+param ipAddress string = ''  //Enter IP address of VM.  Check in Subnet for Free IP
 
 //Build variable for nic name from VM Name
 var nicName = '${vmname}-nic'
@@ -56,7 +59,8 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-09-01' = {
       {
         name: 'ipconfig1'
         properties: {
-          privateIPAllocationMethod: 'Dynamic'
+          privateIPAllocationMethod: 'Static'
+          privateIPAddress: ipAddress
           subnet: {
             id: subnet.id
           }
@@ -87,6 +91,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
         managedDisk: {
           storageAccountType: 'Premium_LRS'
         }
+        caching: 'ReadWrite'
       }
       imageReference: {
         publisher: 'MicrosoftWindowsServer'
@@ -117,7 +122,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-11-01' = {
   }
 }
 
-//Post Deployment Script Run to set UK Region Options
+//Run Post Deployment Script to set UK Regional Settings
 resource postdeploymentscript 'Microsoft.Compute/virtualMachines/runCommands@2022-11-01' = {
   location: location
   parent: vm
@@ -134,5 +139,5 @@ resource postdeploymentscript 'Microsoft.Compute/virtualMachines/runCommands@202
   }
 }
 
-//Output Private IP address of VM.
+//Output IP address of VM
 output ip string = reference(nicName).ipConfigurations[0].properties.privateIPAddress
