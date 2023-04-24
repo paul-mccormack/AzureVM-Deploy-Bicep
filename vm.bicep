@@ -43,6 +43,8 @@ param MgtArea string
 // Get existing subnet
 resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-09-01' existing = {
   name: '${vnetName}/${subnetName}'
+  //If vNet is in a different resource group uncomment next line and enter the name of the resource group
+  scope: resourceGroup('')
 }
 
 //Deploy nic Resource
